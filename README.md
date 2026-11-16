@@ -446,9 +446,25 @@ Run `yarn migrate:encrypt` with the production `ENCRYPTION_KEY` while a backup i
 
 ## Production
 
-Run one API process and one Next.js process behind HTTPS.
+Pick one path.
 
-- API: from `server/`, `NODE_ENV=production yarn start` (PM2, `src/index.js`). Set `PORT` to the port your proxy or container targets.
+### VPS with Docker (`deploy.sh`)
+
+On a VPS, start the containers with `./deploy.sh`. The script runs `docker compose --env-file ./.env up --build -d`, then prunes unused Docker resources.
+
+1. Create a root `.env` (`CLIENT_PORT`, `SERVER_PORT`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_PORT`) plus `server/.env.production` and `client/.env.production` with Slack, Cloudinary, `ENCRYPTION_KEY`, and `JWT_SECRET`. Those production env files are not in git.
+2. `chmod +x deploy.sh` once, then `./deploy.sh`.
+3. Put nginx (or another reverse proxy) in front with TLS. Proxy the public origin to the published reader port (`CLIENT_PORT`). Do not expose the dashboard by opening a raw Docker port on the internet.
+4. Set `APP_URL` and `FRONTEND_URL` to that public HTTPS origin, with no trailing slash, and add `https://YOUR_HOST/api/slack/callback` to both Slack redirect lists.
+5. Keep MongoDB on the private Compose network. Do not publish the database port publicly.
+
+Compose notes: the API container publishes container port 3000, so `PORT` inside `server/.env.production` must be `3000`. The web service publishes container port 4000.
+
+### Yarn without Docker for the app
+
+Use this for local-like hosts, or any machine where you want the Node processes on the host (optionally under pm2 or systemd).
+
+- API: from `server/`, `NODE_ENV=production yarn start` (PM2, `src/index.js`). Set `PORT` to the port your proxy targets.
 - Web: from `client/`, `yarn build` then `yarn start`. Put TLS in front of it. Set `APP_URL` and `FRONTEND_URL` to that public origin.
 - `SERVER_BASE_URL` is called by the Next.js server, so it can be a private address such as `http://127.0.0.1:6000/api`.
 - Put the Slack redirect URL on that public web origin.
@@ -456,10 +472,6 @@ Run one API process and one Next.js process behind HTTPS.
 - In production, failed requests to `/api/auth` are limited to 20 per 15 minutes per IP. Successful logins are not counted.
 - MongoDB should require authentication and should not be published to the internet. Put that URL in `MONGODB_URL`.
 - Prefer a private network path from the API to Cloudinary over embedding the archive in a public Cloudinary folder without access control. The secure URLs stored with each file are only as private as the Cloudinary account settings you choose.
-
-### Docker Compose
-
-`docker-compose.yml` is a sketch, not the supported install. It expects a root `.env` (`CLIENT_PORT`, `SERVER_PORT`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_PORT`) plus `server/.env.production` and `client/.env.production`, which are not in git. The API container publishes port 3000, so `PORT` inside `server/.env.production` must be `3000`. The web service publishes container port 4000, while `client/Dockerfile` sets `PORT=3000`, and that image runs `npm ci` against a `client/package-lock.json` this repo does not contain. Use the [local steps](#run-it-locally) until those images are rebuilt to match.
 
 ## Privacy
 
