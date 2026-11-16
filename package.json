@@ -1,0 +1,48 @@
+{
+  "name": "slack-sync",
+  "version": "1.0.0",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n client,server -c cyan,green \"yarn --cwd client dev\" \"yarn --cwd server dev\"",
+    "migrate:encrypt": "node server/scripts/encryptExistingData.js --apply",
+    "migrate:encrypt:dry": "node server/scripts/encryptExistingData.js",
+    "debug:history-limit": "node server/scripts/checkHistoryRateLimit.js",
+    "add:client": "yarn workspace client add",
+    "add:server": "yarn workspace server add",
+    "remove:client": "yarn workspace client remove",
+    "remove:server": "yarn workspace server remove",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.1",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Blockrithms/keeprithm.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Blockrithms/keeprithm/issues"
+  },
+  "homepage": "https://github.com/Blockrithms/keeprithm#readme",
+  "description": "",
+  "lint-staged": {
+    "client/**/*.{js,ts,tsx}": [
+      "yarn workspace client lint",
+      "yarn workspace client format"
+    ],
+    "server/**/*.js": [
+      "yarn workspace server lint",
+      "yarn workspace server format"
+    ]
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ]
+}

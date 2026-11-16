@@ -1,0 +1,40 @@
+{
+  "display_information": {
+    "name": "Keeprithm",
+    "description": "Archive this workspace's messages, threads, and files onto a server you run.",
+    "background_color": "#151513"
+  },
+  "features": {
+    "bot_user": {
+      "display_name": "Keeprithm",
+      "always_online": false
+    }
+  },
+  "oauth_config": {
+    "redirect_urls": [
+      "http://localhost:3000/api/slack/callback"
+    ],
+    "scopes": {
+      "bot": [
+        "channels:history",
+        "channels:read",
+        "groups:read",
+        "groups:history",
+        "files:read",
+        "users:read",
+        "team:read",
+        "chat:write"
+      ],
+      "user": [
+        "openid",
+        "email",
+        "profile"
+      ]
+    }
+  },
+  "settings": {
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": false,
+    "token_rotation_enabled": false
+  }
+}
